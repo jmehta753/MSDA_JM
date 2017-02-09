@@ -1,0 +1,52 @@
+---
+title: "Mushroom"
+author: "JM"
+date: "February 7, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## DATA 602 : Assignment 1: Mushroom Database 
+
+
+Load the mushroom database
+```{r}
+library(RCurl)
+
+mushroom <- read.csv('https://archive.ics.uci.edu/ml/machine-learning-databases/mushroom/agaricus-lepiota.data', header=FALSE)
+head(mushroom)
+```
+
+Subset the data with columns I am interested in and Assign proper names
+```{r}
+library(plyr)
+mushroom <- mushroom[, c(1,2,4,20,22)]
+#mushroom
+mushroom <- rename(mushroom, c("V1"="Type", "V2"="CapShpe", "V4"="Color"))
+mushroom <- rename(mushroom, c("V20"="RingType", "V22"="Population"))
+head(mushroom)
+```
+
+Map the values in DB to meaningful values
+```{r}
+
+mushroom$Type <- mapvalues(mushroom$Type, from=c("p", "e"), to=c("poisonous", "edible"))
+
+mushroom$CapShpe <- mapvalues(mushroom$CapShpe, from=c("b", "c", "x", "f", "k", "s"), to=c("bell","conical","convex","flat","knobbed","sunken"))
+
+mushroom$Color <- mapvalues(mushroom$Color, from=c("n", "b", "c", "g", "r", "p", "u", "e", "w", "y"), to=c("brown","buff","cinnamon","gray","green","pink","purple","red","white","yellow"))
+
+mushroom$RingType <- mapvalues(mushroom$RingType, from=c("c", "e", "f", "l", "n", "p", "s", "z"), to=c("cobwebby","evanescent","flaring","large","none","pendant","sheathing","zone"))
+
+mushroom$Population <- mapvalues(mushroom$Population, from=c("a", "c", "n", "s", "v", "y"), to=c("abundant","clustered","numerous","scattered","several","solitary"))
+
+
+head(mushroom, n=40)
+```
+
+
