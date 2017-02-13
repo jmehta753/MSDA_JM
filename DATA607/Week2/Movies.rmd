@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+author: "JM"
+date: "February 12, 2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### INSTALLING PACKAGES
+
+```{r}
+install.packages('RMySQL', type = 'source')
+#install.packages('knitr', type = 'source')
+library(RMySQL)
+```
+
+### ESTABLISH CONNECTION
+```{r}
+con <- dbConnect(MySQL(),
+    user = 'root',
+    password = 'xxxx',
+    host = 'localhost',
+    dbname='Movies')
+```
+
+
+### CHECK ACCESSIBILITY
+```{r}
+dbReadTable(conn = con,name = 'Movies')
+dbReadTable(conn = con,name = 'Users')
+dbReadTable(conn = con,name = 'UserRatings')
+```
+
+### SELECT USER RATINGS
+```{r}
+
+ratings <- dbGetQuery(conn = con, statement = "SELECT Movies.MovieName As Movie , Users.FirstName As User, UserRatings.Rating As Rating FROM Movies, Users, UserRatings WHERE Movies.MovieId=UserRatings.MovieId and Users.UserId=UserRatings.UserId;")
+head(ratings)
+
+```
+
+
+
+
