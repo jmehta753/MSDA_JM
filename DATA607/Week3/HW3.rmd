@@ -1,0 +1,144 @@
+---
+title: "DATA 607 HW3"
+author: "JM"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## CHAPTER 8 QS 3
+### Extract the names
+```{r}
+library(stringr)
+raw.data <-"555-1239Moe Szyslak(636) 555-0113Burns, C. Montgomery555-6542Rev. Timothy Lovejoy555 8904Ned Flanders636-555-3226Simpson, Homer5553642Dr. Julius Hibbert"
+name <- unlist(str_extract_all(raw.data, "[[:alpha:]., ]{2,}"))
+name
+```
+### Reorder the first and second names 
+```{r}
+first_second <- str_split(name, ", ")
+first_second <- sapply(first_second, function(x) str_replace(paste(x[2], x[1]),"^NA ",""))
+title_regex <- "^(Mr|Mrs|Dr|Rev)\\."
+str_replace(first_second, title_regex, "")
+```
+### Detect which have the titles
+```{r}
+str_detect(first_second, title_regex)
+```
+```{r}
+str_detect(first_second, "[:blank:][:alpha:].[:blank:]")
+```
+
+
+## CHAPTER 8 QS 4
+Describe the types of strings that conform to the following regular expressions and
+construct an example that is matched by the regular expression.
+
+### (a) [0-9]+\\$ is for Money (digits followed by $)
+```{r}
+samples <- c('123$', '456$', 8900)
+str_match(samples, "[0-9]+\\$")
+```
+### (b) \\b[a-z]{1,4}\\b is first instance of a word of size 1 to 4 that sit inside a sentence.
+```{r}
+samples <- c('Here we go', 'Oye', 8900, 'I will not forgive you Mr. 500.')
+str_match(samples, "\\b[a-z]{1,4}\\b")
+```
+### (c) .*?\\.txt$ is for filenames with extension txt
+```{r}
+samples <- c('abc.csv', 'Tex.txt', '8900.txt', 7200, 'Wer$234.txt')
+str_match(samples, ".*?\\.txt$")
+```
+
+### (d) \\d{2}/\\d{2}/\\d{4} is for dd/dd/dddd - a rather non-strict representation of date
+```{r}
+samples <- c('22/12/2008', 'Tex.txt', '8900/12/12', '12/1/7200', '90/90/9000')
+str_match(samples, "\\d{2}/\\d{2}/\\d{4}")
+```
+### (e) <(.+?)>.+?</\\1> is for xml opening and closing tags, though strictly speaking xml tags do not allow many special characters as shown below.
+```{r}
+samples <- c('<abcd>.xx</abcd>.', '<xxx>Tex.txt</xxx>', '<root>8900.txt', 7200, '<456->Wer$234.txt</456->')
+str_match(samples, "<(.+?)>.+?</\\1>")
+```
+
+## CHAPTER 8 QS 9
+The following code hides a secret message. Crack it with R and regular expressions.
+Hint: Some of the characters are more revealing than others! The code snippet is also
+available in the materials at www.r-datacollection.com.
+clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0Tanwo
+Uwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaootj55t3Nj3ne6c4Sfek.r1w1YwwojigO
+d6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5
+fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr
+
+```{r}
+raw.data1 <- "clcopCow1zmstc0d87wnkig7OvdicpNuggvhryn92Gjuwczi8hqrfpRxs5Aj5dwpn0TanwoUwisdij7Lj8kpf03AT5Idr3coc0bt7yczjatOaootj55t3Nj3ne6c4Sfek.r1w1YwwojigOd6vrfUrbz2.2bkAnbhzgv4R9i05zEcrop.wAgnb.SqoU65fPa1otfb7wEm24k6t3sR9zqe5fy89n6Nd5t9kc4fE905gmc4Rgxo5nhDk!gr"
+
+```
+### Lets assume this is a message in english and is a transformation which is done by mapping the alphabets to an another set
+
+### SEARCH FOR SPACE - would be one of most commonly occuring character
+```{r}
+sort(table(str_extract_all(raw.data1, ".")), decreasing=TRUE)[1:10]
+```
+
+### So let's search for most commonly used three letter words - 'and' and 'the'. For this let's what three letter groups are most repeating in the given messae.
+```{r}
+str_extract_all(raw.data1, "c...c")
+str_extract_all(raw.data1, "5...5")
+str_extract_all(raw.data1, "o...o")
+str_extract_all(raw.data1, "w...w")
+str_extract_all(raw.data1, "g...g")
+str_extract_all(raw.data1, "n...n")
+str_extract_all(raw.data1, "f...f")
+str_extract_all(raw.data1, "j...j")
+str_extract_all(raw.data1, "r...r")
+str_extract_all(raw.data1, "t...t")
+#space_vowels_period <- c("c","5","o","w","g","n","f","j","r","t")
+#str_replace_all(raw.data1, space_vowels_period, "\ ")
+```
+
+### Based on above let's assume 'n' is space but our results are not encouraging (fragments too long), so we will try with 't' also, which is also disappointing for same reason
+```{r}
+str_replace_all(raw.data1,"n", "\ ")
+```
+```{r}
+str_replace_all(raw.data1,"t", "\ ")
+```
+### Let's just try with various other elements we identified as 'space' candidates. But our results are similar.
+```{r}
+str_replace_all(raw.data1,"j", "\ ")
+raw.data1
+str_replace_all(raw.data1,"5", "\ ")
+str_replace_all(raw.data1,"o", "\ ")
+str_replace_all(raw.data1,"w", "\ ")
+str_replace_all(raw.data1,"g", "\ ")
+str_replace_all(raw.data1,"f", "\ ")
+str_replace_all(raw.data1,"r", "\ ")
+str_replace_all(raw.data1,"c", "\ ")
+
+```
+### Let's try another approach - try to find repeating 2 or 3 character sequences. (substitutes for of, in, the, and)
+```{r}
+sort(table(str_extract_all(raw.data1, ".{2}")), decreasing=TRUE)
+sort(table(str_extract_all(raw.data1, ".{3}")), decreasing=TRUE)
+
+```
+
+### So let's search for most commonly used three letter words - 'and' and 'the'. For this let's what three letter groups are most repeating in the given messae.
+```{r}
+str_extract_all(raw.data1, "c..c")
+str_extract_all(raw.data1, "5..5")
+str_extract_all(raw.data1, "o..o")
+str_extract_all(raw.data1, "w..w")
+str_extract_all(raw.data1, "g..g")
+str_extract_all(raw.data1, "n..n")
+str_extract_all(raw.data1, "f..f")
+str_extract_all(raw.data1, "j..j")
+str_extract_all(raw.data1, "r..r")
+str_extract_all(raw.data1, "t..t")
+```
+### Status : Unresolved. I would think 'space' is represented by a combination of characters. and following from that it is possible other characters are also represented by multiple characters.
+
