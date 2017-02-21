@@ -22,14 +22,16 @@ name
 first_second <- str_split(name, ", ")
 first_second <- sapply(first_second, function(x) str_replace(paste(x[2], x[1]),"^NA ",""))
 title_regex <- "^(Mr|Mrs|Dr|Rev)\\."
-str_replace(first_second, title_regex, "")
+name_wo_title<-str_replace(first_second, title_regex, "")
+name_wo_title
 ```
-### Detect which have the titles
+### Detect which have the titles - the vector
 ```{r}
 str_detect(first_second, title_regex)
 ```
+### Detect which have the second names
 ```{r}
-str_detect(first_second, "[:blank:][:alpha:].[:blank:]")
+name_wo_title[str_detect(name_wo_title, "\\b[a-zA-Z]\\b")]
 ```
 
 
