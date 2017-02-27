@@ -1,0 +1,92 @@
+---
+title: "DATA607_Project1"
+author: "JM"
+date: "February 25, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Read the Header lines and join them to create joint header
+```{r}
+library(RCurl)
+library(stringr)
+headers <- read.delim("tournamentinfo.txt", sep="|", header=FALSE, nrows = 2, skip = 1, stringsAsFactors = FALSE, skipNul = TRUE, strip.white = TRUE)
+header1 <- str_trim(headers[1,])[1:10]
+header2 <- str_trim(headers[2,])[1:10]
+header1[1] <- "PlayerId"
+header1[4:10] <- paste("Round-",header2[4:10], "-Opponent")
+header2[4:10] <- paste("Round-", header2[4:10], "-Result")
+headers <- c(header1,header2)
+headers
+```
+
+## Read the data and create joint dataframe and assigne headers
+```{r}
+lines<-readLines(con=file("tournamentinfo.txt"), warn=FALSE)
+lines<-str_replace_all(lines, "-{2,}", "  ")
+count<-length(lines)
+lines <- lines[4:count]
+data<-read.table(text=lines, blank.lines.skip = TRUE, sep="|", header=FALSE, strip.white = TRUE, skipNul = TRUE, na.strings=c("", "NA"),as.is = TRUE)
+num_players<-nrow(data)/2
+oddRows <- seq(1,by=2,len=num_players)
+evenRows <- seq(2,by=2,len=num_players)
+rows<-seq(1,by=1,len=num_players)
+data1<-data[oddRows,][1:10]
+row.names(data1)<-rows
+data2<-data[evenRows,][1:10]
+row.names(data2)<-rows
+dataJoined<-merge(data1,data2,by=0)[2:21]
+colnames(dataJoined) <- headers
+dataJoined
+```
+
+### Create Schema and DB
+```{r}
+install.packages('RMySQL', type = 'source')
+library(RMySQL)
+con <- dbConnect(MySQL(),
+    user = 'root',
+    password = 'yahoo77_',
+    host = 'localhost',
+    dbname='Movies')
+dbSendQuery(conn=con,statement="Drop Database If Exists Project1")
+dbSendQuery(conn=con,statement="Create Database Project1")
+dbSendQuery(conn=con,statement="Use Project1")
+```
+
+### Write Data to DataFrame and Also create interim table for average calcs
+```{r}
+dbSendQuery(conn=con,statement="DROP TABLE IF EXISTS Tournament")
+dbWriteTable(conn=con, name="Tournament", value=dataJoined, fields=header, row.names=FALSE)
+dbSendQuery(conn=con,statement="DROP TABLE IF EXISTS Tournament_Interim")
+dbSendQuery(conn=con,statement="CREATE TABLE PROJECT1.TOURNAMENT_INTERIM( 
+  PLAYERID VARCHAR(3),
+  R1ID VARCHAR(3), 
+  R2ID VARCHAR(3), 
+  R3ID VARCHAR(3), 
+  R4ID VARCHAR(3),
+  R5ID VARCHAR(3), 
+  R6ID VARCHAR(3),
+  R7ID VARCHAR(3)
+  )
+  SELECT PLAYERID, 
+  SUBSTR(T1.`Round- 1 -Opponent`, 3) R1ID, 
+  SUBSTR(T1.`Round- 2 -Opponent`, 3) R2ID, 
+  SUBSTR(T1.`Round- 3 -Opponent`, 3) R3ID, 
+  SUBSTR(T1.`Round- 4 -Opponent`, 3) R4ID, 
+  SUBSTR(T1.`Round- 5 -Opponent`, 3) R5ID, 
+  SUBSTR(T1.`Round- 6 -Opponent`, 3) R6ID, 
+  SUBSTR(T1.`Round- 7 -Opponent`, 3) R7ID
+  from project1.tournament T1")
+```
+
+### Read data from table and write to csv
+```{r}
+Results <- dbGetQuery(conn = con, statement = "Select `Player Name` , Num , Total , SUBSTR(`USCF ID / Rtg (Pre->Post)`,15,4) Pre from project1.tournament")
+write.csv(Results, file="TournamentResults.csv", quote=FALSE, row.names=FALSE)
+
+```
+### Not finished : Read Interim table to calculate Average scores
