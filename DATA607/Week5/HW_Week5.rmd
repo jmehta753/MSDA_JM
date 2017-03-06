@@ -1,0 +1,60 @@
+---
+title: "Data 607 Week 5"
+author: "JM"
+date: "March 5, 2017"
+output: html_document
+---
+
+### Basic Setup
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("knitr")
+
+```
+
+### Set up libraries
+```{r}
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+### Read Data and Clean up headers
+```{r}
+AirlineData <- read.csv("AirlineData1.csv", header=TRUE, blank.lines.skip = TRUE, )
+colnames(AirlineData)[1]<-"Airline"
+colnames(AirlineData)[2]<-"Status"
+AirlineData
+```
+
+## Tidy the data 
+```{r}
+AirlineDataTidy1 <- gather(AirlineData, Destination, Number, Los.Angeles:Seattle)
+AirlineDataTidy <- spread(AirlineDataTidy1, Status, Number)
+colnames(AirlineDataTidy)[3:4]<- c('Delayed','OnTime')
+AirlineDataTidy
+```
+
+## Analysis of Data
+
+### Analyse the data for sector specific delays and overall delays
+#### Sector-wise comparison
+```{r}
+delaySectorWise <- mutate(group_by(AirlineDataTidy, Airline), DelayPercent=(Delayed/(Delayed+OnTime))*100)
+delaySectorWise <- arrange(delaySectorWise, Destination)
+delaySectorWise
+ggplot(data=delaySectorWise, aes(x=Destination, y=DelayPercent, group=Airline, color=Airline)) + geom_line() +
+    geom_point()
+```
+
+#### Conclusion: ALASKA airlines has a lower delay in all sectors compared to AM WEST. This is also confirmed by the chart.
+
+#### Sector-wise comparison
+```{r}
+OverallDelays<-mutate(summarise(group_by(AirlineDataTidy, Airline), DelayedAll=sum(Delayed), OnTimeAll=sum(OnTime)), DelayPercentAll=100*DelayedAll/(DelayedAll+OnTimeAll))
+OverallDelays
+```
+
+#### Conclusion: AM WEST has a lower delay percent compared to ALASKA when all flights are considered. This is because they have some sectors where their volume is very high and the percentage of delays in those sectors is lower than average delay.
