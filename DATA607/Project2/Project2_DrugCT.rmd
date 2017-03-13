@@ -1,0 +1,80 @@
+---
+title: "Project2 Drug Abuse CT"
+author: "JM"
+date: "March 12, 2017"
+output: html_document
+---
+
+### Basic Setup
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("knitr")
+```
+
+### Set up libraries
+```{r}
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+#library(ggmap)
+```
+
+### Read Data and Select Relevant Columns
+```{r}
+AllAbuseData <- read.csv(file="C:/MSDA/D607/Project2/DrugFatalitiesCT/Accidental_Drug_Related_Deaths__2012-2016.csv")
+head(AllAbuseData)
+names(AllAbuseData)
+```
+
+## Tidy And Analyse the data for Drug cause
+```{r}
+DeathCauseTidy <- select(AllAbuseData, CaseNumber, Heroin:Other)
+DeathCauseTidy <- DeathCauseTidy %>% gather(DrugName, Present, Heroin:Other)
+DeathCauseTidy <- DeathCauseTidy %>% filter(Present!="") %>% select(CaseNumber, DrugName)
+DeathCauseTidy <- DeathCauseTidy %>% group_by(DrugName) 
+DeathCauseDrugCount <- DeathCauseTidy %>% summarise(count=n())
+head(DeathCauseDrugCount)
+```
+
+## Tidy And Analyse the data for Race Background
+```{r}
+BackgroundTidy <- select(AllAbuseData, CaseNumber, Sex, Race, Age)
+BackgroundTidy
+RaceTidy <- BackgroundTidy %>% separate(Race, sep=",", into = c("PrimaryRace","SecondaryRace"))
+RaceTidy
+PrimaryRaceCount<-RaceTidy %>% group_by(PrimaryRace) %>% summarise(count=n())
+colnames(PrimaryRaceCount)[1]<-"Race"
+PrimaryRaceCount$Race<-trimws(PrimaryRaceCount$Race)
+PrimaryRaceCount
+SecRaceCount<-RaceTidy %>% group_by(SecondaryRace) %>% summarise(count=n())
+colnames(SecRaceCount)[1]<-"Race"
+SecRaceCount$Race<-trimws(SecRaceCount$Race)
+AllRaceCount <- left_join(x=PrimaryRaceCount, y=SecRaceCount, "Race")
+AllRaceCount$count.y[is.na(AllRaceCount$count.y)] <- 0
+AllRaceCount
+AllRaceCount <- AllRaceCount %>% mutate(total=count.x+count.y)
+AllRaceCount %>% arrange(total)
+```
+### The biggest abuse is seen in WHITE population. But this needs to be further analysed in terms of state population to ascertain what percentage of population of a specific Race is more affected.
+
+## Tidy And Analyse the data for Age Background
+```{r}
+BackgroundTidy <- select(AllAbuseData, CaseNumber, Age)
+BackgroundTidy<-BackgroundTidy %>% mutate(Age=as.integer(Age))
+BackgroundTidy
+BackgroundTidyBelow20 <- BackgroundTidy %>%  filter(Age<=20) %>% summarise(count=n())
+BackgroundTidyBelow20$AgeGroup <- "Below20"
+BackgroundTidy2140 <- BackgroundTidy %>%  filter(Age>20 & Age<=40) %>% summarise(count=n())
+BackgroundTidy2140$AgeGroup <- "21-40"
+BackgroundTidy4160 <- BackgroundTidy %>%  filter(Age>40 & Age<=60) %>% summarise(count=n())
+BackgroundTidy4160$AgeGroup <- "41-60"
+BackgroundTidyAbove60 <- BackgroundTidy %>%  filter(Age>60) %>% summarise(count=n())
+BackgroundTidyAbove60$AgeGroup <- "Above60"
+AllAgeGroups <- bind_rows(BackgroundTidyBelow20, BackgroundTidy2140, BackgroundTidy4160, BackgroundTidyAbove60)
+AllAgeGroups <- AllAgeGroups[c("AgeGroup", "count")]
+AllAgeGroups
+
+```
+### As noted above no major difference seen in drug abuse between Ages above and below 40. 

@@ -1,0 +1,69 @@
+---
+title: "Project2_GINI"
+author: "JM"
+date: "March 12, 2017"
+output: html_document
+---
+### Basic Setup
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("knitr")
+```
+
+### Set up libraries
+```{r}
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+### Read Data and Select Relevant Columns
+```{r}
+AllGiniData <- read.csv(file="C:/MSDA/D607/Project2/Data_Extract_From_World_Development_Indicators/GiniData.csv")
+AllGiniData
+GiniRelevantData <- AllGiniData %>% select(-1, -2)
+GiniRelevantData <- GiniRelevantData %>% filter(Country.Name != "")
+GiniRelevantData
+```
+
+## Tidy the data 
+```{r}
+GiniTidy <- gather(GiniRelevantData, Year, GiniCoeff, X1990..YR1990.:X2016..YR2016., convert = FALSE)
+GiniTidy
+GiniTidy <- GiniTidy %>% filter(GiniCoeff != "..") %>% filter(!is.na(GiniCoeff))
+GiniTidy
+GiniTidy <- GiniTidy %>% separate(Year,sep="\\.\\.",into=c("Tmp","Year")) %>% select(-Tmp) %>% separate(Year,sep="\\.",into=c("Year","Tmp")) %>% select(-Tmp) %>% separate(Year,sep="YR",into=c("Tmp","Year")) %>% select(-Tmp)
+as.numeric(GiniTidy$GiniCoeff)
+GiniTidy<-GiniTidy %>% mutate(GiniCoeff=as.numeric(GiniCoeff))
+GiniTidy
+```
+
+## Analysis of Data - 
+## 1. Average Gini Coefficient Region-wise and Its trends over the years
+## 2. Average Gini Coefficient according to Income category to see if we can find any conclusions
+
+### Read Metadata and Select relevant columns
+```{r}
+AllGiniMetaData <- read.csv(file="C:/MSDA/D607/Project2/Data_Extract_From_World_Development_Indicators/Data_Extract_From_World_Development_Indicators_Metadata.csv")
+AllGiniMetaData
+GiniRelevantMetaData <- AllGiniMetaData %>% select(Code, Long.Name, Income.Group, Region, Currency.Unit)
+GiniRelevantMetaData
+```
+
+### Region Analysis
+```{r}
+colnames(GiniTidy)[2] <- "Code"
+GiniCombinedData <- left_join(x=GiniTidy, y=GiniRelevantMetaData, by=c("Code", "Code"))
+GiniCombinedData
+```
+
+```{r}
+GiniByRegion <- GiniCombinedData %>% group_by(Region) %>% summarise(AvgGini=mean(GiniCoeff))
+GiniByRegion %>% arrange(AvgGini)
+```
+```{r}
+GiniByIncome <- GiniCombinedData %>% group_by(Income.Group) %>% summarise(AvgGini=mean(GiniCoeff))
+GiniByIncome %>% arrange(AvgGini)
+```

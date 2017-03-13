@@ -1,0 +1,71 @@
+---
+title: "Project2 VotingRecords"
+author: "JM"
+date: "March 12, 2017"
+output: html_document
+---
+
+
+### Basic Setup
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("knitr")
+```
+
+### Set up libraries
+```{r}
+library(stringr)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+#library(ggmap)
+```
+
+### Read Data and Select Relevant Columns
+```{r}
+AllVotingRecords <- read.csv(file="C:/MSDA/D607/Project2/house-votes-84.data.txt", header=FALSE)
+Headers <- read.csv(file="C:/MSDA/D607/Project2/house-headers.txt", header=FALSE)
+head(AllVotingRecords)
+Headers<-unlist(Headers)
+Headers<-trimws(Headers)
+Headers<- gsub("-", "_", Headers)
+Headers<- gsub(" ", "_", Headers)
+colnames(AllVotingRecords) <- Headers
+names(AllVotingRecords)
+head(AllVotingRecords)
+```
+
+### Tidy The data 
+```{r}
+head(AllVotingRecords)
+AllVotingRecordsTidy <- AllVotingRecords %>% gather(Issue, VoteType, handicapped_infants:export_administration_act_south_africa)
+AllVotingRecordsTidy <- AllVotingRecordsTidy %>% filter(VoteType!="?")
+AllVotingRecordsTidy1 <- AllVotingRecordsTidy %>% unite(NewClass,sep="_", Class_Name, VoteType)
+head(AllVotingRecordsTidy1)
+AllVotingRecordsTidy2<- AllVotingRecordsTidy1 %>% group_by(Issue,NewClass) %>% summarise(count=n())
+AllVotingRecordsTidy2 <- AllVotingRecordsTidy2 %>% spread(NewClass, count)
+head(AllVotingRecordsTidy2)
+```
+### Analyse the data to find issues of difference and common ground
+```{r}
+AllVotingRecordsTidy3 <- AllVotingRecordsTidy2 %>% mutate(DemocratAyes=democrat_y/(democrat_n+democrat_y) * 100) %>% mutate(RepublicanAyes=republican_y/(republican_y+republican_n) * 100) %>% select(Issue, DemocratAyes, RepublicanAyes)
+head(AllVotingRecordsTidy3)
+AllVotingRecordsTidy4<-AllVotingRecordsTidy3 %>% mutate(Differential=DemocratAyes-RepublicanAyes)
+head(AllVotingRecordsTidy4)
+summary(AllVotingRecordsTidy4$Differential)
+```
+## Issues of Most Difference
+```{r}
+VotingRepubFavorite<-AllVotingRecordsTidy4 %>% arrange(Differential)
+VotingDemoFavorite<-AllVotingRecordsTidy4 %>% arrange(desc(Differential))
+head(VotingRepubFavorite)
+head(VotingDemoFavorite)
+```
+### As noted issues of most difference are Physician_free_freeze and el_savlador_aid where Republicans favor and AdoptionOfBudget and Aid to Nicaragua where Republicans favor
+## Issues of Common ground
+```{r}
+VotingBothFavorite<-AllVotingRecordsTidy4 %>% filter(Differential<10 & Differential>-10)
+head(VotingBothFavorite)
+```
+### As noted the issue of consenus are Immigration (this was 1980s !!!!) and Water project sharing
