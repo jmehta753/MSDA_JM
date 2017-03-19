@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<books>
+  <book>
+    <Id>1</Id>
+    <Title>The Code Book: The Science of Secrecy from Ancient Egypt to Quantum Cryptography</Title>
+    <Authors>Simon Singh</Authors>
+    <Year>2000</Year>
+    <Genres>Cryptography, Linguistics, History</Genres>
+    <Movie-Adaptation/>
+  </book>
+  <book>
+    <Id>2</Id>
+    <Title>Alan Turing: The Enigma</Title>
+    <Authors>Andrew Hodges, Douglas Hofstadter</Authors>
+    <Year>1985</Year>
+    <Genres>History, Mathematics, Technology</Genres>
+    <Movie-Adaptation>The Imitation Game</Movie-Adaptation>
+  </book>
+  <book>
+    <Id>3</Id>
+    <Title>Hidden Figures: The Story of the African-American Women Who Helped Win the Space Race</Title>
+    <Authors>Margot Lee Shetterly</Authors>
+    <Year>2016</Year>
+    <Genres>History, African-American, Technology</Genres>
+    <Movie-Adaptation>Hidden Figures</Movie-Adaptation>
+  </book>
+</books>
