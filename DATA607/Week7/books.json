@@ -1,5 +1,4 @@
 {
-   "books": {
       "book": [
          {
             "Id": "1",
@@ -26,5 +25,4 @@
             "Movie-Adaptation": "Hidden Figures"
          }
       ]
-   }
 }
