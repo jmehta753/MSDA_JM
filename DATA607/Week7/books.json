@@ -2,7 +2,7 @@
          {
             "Id": "1",
             "Title": "The Code Book: The Science of Secrecy from Ancient Egypt to Quantum Cryptography",
-            "Authors": "Simon Singh",
+            "Authors": ["Simon Singh"],
             "Year": "2000",
             "Genres": "Cryptography, Linguistics, History",
             "Movie-Adaptation": null
@@ -10,7 +10,7 @@
          {
             "Id": "2",
             "Title": "Alan Turing: The Enigma",
-            "Authors": "Andrew Hodges, Douglas Hofstadter",
+            "Authors": ["Andrew Hodges", "Douglas Hofstadter"],
             "Year": "1985",
             "Genres": "History, Mathematics, Technology",
             "Movie-Adaptation": "The Imitation Game"
@@ -18,7 +18,7 @@
          {
             "Id": "3",
             "Title": "Hidden Figures: The Story of the African-American Women Who Helped Win the Space Race",
-            "Authors": "Margot Lee Shetterly",
+            "Authors": ["Margot Lee Shetterly"],
             "Year": "2016",
             "Genres": "History, African-American, Technology",
             "Movie-Adaptation": "Hidden Figures"

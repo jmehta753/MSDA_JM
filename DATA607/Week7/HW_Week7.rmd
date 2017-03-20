@@ -1,0 +1,46 @@
+---
+title: "Data 607 Week 7"
+author: "JM"
+date: "March 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE, eval=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("XML")
+#install.packages("RTidyHTML")
+```
+
+```{r}
+library(stringr)
+library(RCurl)
+library(RJSONIO)
+library(jsonlite)
+library(XML)
+#library(RTidyHTML)
+```
+### Parse HTML from Web and convert to Data Frame
+```{r}
+booksContent <- getURL("https://raw.githubusercontent.com/jmehta753/MSDA_JM/master/DATA607/Week7/books.html")
+books <- htmlParse(booksContent, useInternalNodes = TRUE)
+child <- xmlChildren(xmlRoot(books))
+child <- xmlChildren(child$body)
+table <- xmlChildren(child$table)
+HTMLDF <- readHTMLTable(child$table)
+HTMLDF
+```
+### Parse JSON from Web and convert to Data Frame
+```{r}
+booksJson <- getURL("https://raw.githubusercontent.com/jmehta753/MSDA_JM/master/DATA607/Week7/books.json")
+booksJsonDF<-fromJSON(booksJson)
+booksJsonDF
+```
+### Parse XML from Web and convert to Data Frame
+```{r}
+booksXml <- getURL("https://raw.githubusercontent.com/jmehta753/MSDA_JM/master/DATA607/Week7/books.xml")
+booksXml1 <- xmlParse(booksXml)
+booksXml1 <- xmlRoot(booksXml1)
+booksXMLDF <- xmlSApply(booksXml1, function(x) xmlSApply(x, xmlValue))
+booksXMLDF <- data.frame(t(booksXMLDF), row.names = NULL)
+booksXMLDF
+```
