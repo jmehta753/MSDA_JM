@@ -1,5 +1,4 @@
-{
-      "book": [
+[
          {
             "Id": "1",
             "Title": "The Code Book: The Science of Secrecy from Ancient Egypt to Quantum Cryptography",
@@ -24,5 +23,4 @@
             "Genres": "History, African-American, Technology",
             "Movie-Adaptation": "Hidden Figures"
          }
-      ]
-}
+]
