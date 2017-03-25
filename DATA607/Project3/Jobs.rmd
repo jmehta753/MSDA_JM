@@ -1,0 +1,94 @@
+---
+title: "P3"
+author: "JM"
+date: "March 24, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+---
+title: "P3"
+author: "JM"
+date: "March 24, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+install.packages("knitr")
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(bitops)
+library(RCurl)
+library(jsonlite)
+library(stringr)
+library(dplyr)
+library(plyr)
+```
+
+```{r}
+urlfn <- function(i) {
+  url <- paste("http://service.dice.com/api/rest/jobsearch/v1/simple.json?text=data+science&page=", i, sep="")
+  return(url)
+}
+mainURLs <- sapply(1:2, urlfn)
+
+# Main Table
+allPagesCtr <- 1
+for(mainURL in mainURLs) {
+  print(paste0("Processing Page ",allPagesCtr))
+  mainContent <- getURL(mainURL)
+  mainJson <- fromJSON(jobcontent)
+  names(mainJson$resultItemList)
+  mainDF <- mainJson$resultItemList
+
+  # Sub Table
+  jobskills <- c("Python"," R ","analytics","leadership","programming")
+  Suburls <- mainDF$detailUrl 
+  
+  mainCtr <- 1
+  subdf <- ldply(Suburls, function(suburl) {
+    df1 <- data.frame(matrix(ncol = 4, nrow = 5))
+    colnames(df1) <- c("Id", "SubUrl", "Skill", "Count")
+    text <- readLines(suburl)
+    text <- str_c(text, collapse = "")
+    countr<- 1
+    for (skill in jobskills) {
+      skillcount <- lapply(skill, str_count, string=text)
+      df1[countr,1] <- mainCtr
+      df1[countr,2] <- suburl
+      df1[countr,3] <- skill
+      df1[countr,4] <- skillcount
+      mainCtr <<-  mainCtr + 1
+      countr <- countr + 1
+    }
+    df1
+  })
+  #class(subdf)
+  #names(subdf)
+  allPagesCtr <<- allPagesCtr + 1
+  combinedDF <- inner_join(x=mainDF, y=subdf, by=c("detailUrl" = "SubUrl") )
+  print(paste0("Created CombinedDF with dimensions=",dim(combinedDF)))
+  write.csv(combinedDF, file = "Jobs1.csv", append=TRUE)
+}
+
+```
