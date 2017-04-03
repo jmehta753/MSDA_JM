@@ -1,0 +1,76 @@
+---
+title: "DATA607 HW Week9"
+author: "JM"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: yeti
+    highlight: tango
+    code_folding: hide
+---
+## A look at NYTimes Movies API
+```{r eval=FALSE}
+install.packages("rmarkdown") # Make cool dynamic documents
+install.packages("knitr") # Run R Code Chunks
+install.packages("ggplot2") # For plotting
+install.packages("DT") # Interactive HTML tables
+install.packages("tidyverse") # Tidy Universe
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(rmarkdown) 
+library(DT) 
+library(jsonlite)
+```
+
+### Movie Critics at NY Times
+```{r}
+criticsBioDF <- fromJSON("http://api.nytimes.com/svc/movies/v2/critics/all.json?api-key=7953e673412b420c844f697e96e9a57a")
+results <- criticsBioDF$results
+resultsView <- results %>% select(display_name, status, bio)
+
+resultsView$bio <- substr(resultsView$bio, 1, 120)
+resultsView$bio <- lapply(resultsView$bio, function(x) paste(c(x, '...'), collapse=''))
+colnames(resultsView) <- c("Name", "Status", "Bio")
+datatable(resultsView)
+```
+
+
+
+#### Those who we can see
+```{r}
+imageFn <- function(src) {
+  if(is.na(src)) {
+    return('')
+  } else {
+    p <- paste(c("![Bio](", src, ")"), collapse='')
+    return(p)
+  }
+}
+
+results$image <- lapply(criticsBioDF$results$multimedia$resource$src, imageFn)
+resultsImgView <- results %>% select(display_name, image)
+resultsImgView <- resultsImgView %>% filter(image!='')
+colnames(resultsImgView) <- c("Name", "Photo")
+kable(head(resultsImgView,10))
+
+```
+
+
+### Reviews of Recent movies
+```{r}
+movieReviewsRecentDF <- fromJSON("http://api.nytimes.com/svc/movies/v2/reviews/search.json?order=by-date&api-key=7953e673412b420c844f697e96e9a57a")
+moviesReviews <- movieReviewsRecentDF$results %>% select(-(date_updated:multimedia), -summary_short)
+moviesReviews$link <- movieReviewsRecentDF$results$link$url
+moviesReviews$image <- lapply(movieReviewsRecentDF$results$multimedia$src, imageFn)
+colnames(moviesReviews) <- c("Movie", "MPAA Rating", "Critics", "Name", "Headline", "Review Date", "Movie Date", "Review Link", "Movie Pic")
+moviesReviews$Critics <- lapply(moviesReviews$Critics, function(x) {if(x==1) 'Up' else 'Down'})
+moviesReviews <- moviesReviews %>% arrange(Movie)
+kable(moviesReviews)
+```
