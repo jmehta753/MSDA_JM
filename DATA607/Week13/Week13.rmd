@@ -1,0 +1,65 @@
+---
+title: "Creating Yelp Network Graph in Neo4J"
+author: "JM"
+date: "April 30, 2017"
+output: html_document
+---
+
+
+## Libraries to Install
+```{r eval=FALSE}
+install.packages("rmarkdown") # Make cool dynamic documents
+install.packages("knitr") # Run R Code Chunks
+install.packages("ggplot2") # For plotting
+install.packages("DT") # Interactive HTML tables
+install.packages("tidyverse") # Tidy Universe
+install.packages("RNeo4j")
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stringr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(rmarkdown) 
+library(DT) 
+library(jsonlite)
+library(plyr)
+library(RNeo4j)
+```
+### Download Yelp Data and Read 500 lines
+```{r}
+text <- readLines("C:\\Jai\\MSDA\\MSDA_JM\\DATA607\\yelp_academic_dataset_user.json",n = 500 )
+```
+### Convert to DataFrame
+```{r}
+yDF <- ldply(paste0("[",text,"]"), function(x) jsonlite::fromJSON(x))
+```
+
+### Create Neo4J Graph using RNeo4J
+```{r}
+graph = startGraph("http://localhost:7474/db/data", username="neo4j", password="ceylon77")
+
+for(i in yDF$user_id) {
+  createNode(graph, "User", name = i)
+  #addConstraint(graph, "User", "name")
+}
+
+# createRel <- function(row) {
+#   uId <- row$user_id
+#   userNode <- getUniqueNode(graph, "User", name = uId)
+#   friends <- row$friends
+#   for(friend in friends) {
+#     if(friend %in% yDF$user_id) {
+#       friendNode <- getUniqueNode(graph, "User", name=friend)
+#       createRel(friendNode, "IS FRIEND WITH", userNode)
+#     }
+#   }
+# }
+# 
+# by(yDF, 1:nrow(yDF), createRel)
+
+```
+### Output in Neo4J
+![](C:/Jai/MSDA/MSDA_JM/DATA607/Week13/Neo4J.png)
