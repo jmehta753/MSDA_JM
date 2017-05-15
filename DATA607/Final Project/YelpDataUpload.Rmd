@@ -1,0 +1,66 @@
+---
+title: "Yelp Data Upload To Azure"
+author: "JM"
+date: "May 6, 2017"
+output: html_document
+---
+
+
+Note -  RSQLServer deprecated. RODBC > RJDBC
+ Download drivers.https://www.microsoft.com/en-us/download/details.aspx?id=50420
+ 
+
+```{r}
+library(RODBC)
+library(jsonlite)
+connectionString <- "Driver=ODBC Driver 13 for SQL Server;Server=tcp:data607yelp1.database.windows.net,1433;Database=DATA607_FinalProject_Yelp1;Uid=data607@data607yelp1;Pwd=XXX;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+conn <- odbcDriverConnect(connectionString)
+```
+
+```{r eval=FALSE}
+df <- stream_in(file("C:/Jai/MSDA/MSDA_JM/DATA607/Yelp/yelp_academic_dataset_business.json"), pagesize = 500, flatten=TRUE, simplifyDataFrame=TRUE)
+sqlSave(conn, df, tablename="YelpBusiness", rownames=FALSE, append=TRUE)
+```
+
+
+```{r}
+for(i in 1:9) {
+  filename <- paste0("yelp_user0",i)
+  filepath <- paste0("C:/Jai/MSDA/MSDA_JM/DATA607/Yelp/YelpUser/",filename)
+  print(filepath)
+  df <- stream_in(file(filepath), pagesize = 500, flatten=TRUE, simplifyDataFrame=TRUE)
+  sqlSave(conn, df, tablename="YelpUser", rownames=FALSE, append=TRUE, verbose=FALSE, fast=TRUE)
+}
+
+df <- stream_in(file("C:/Jai/MSDA/MSDA_JM/DATA607/Yelp/YelpUser/yelp_user10"), pagesize = 500, flatten=TRUE, simplifyDataFrame=TRUE)
+sqlSave(conn, df, tablename="YelpUser", rownames=FALSE, append=TRUE, verbose=FALSE, fast=TRUE)
+
+
+```
+
+
+```{r}
+for(i in 0:9) {
+  filename <- paste0("yelp_reviewn0",i)
+  filepath <- paste0("C:/Jai/MSDA/MSDA_JM/DATA607/Yelp/YelpReview/",filename)
+  print(filepath)
+  dfr <- stream_in(file(filepath), pagesize = 5000, flatten=TRUE, simplifyDataFrame=TRUE)
+  sqlSave(conn, dfr, tablename="YelpReview", rownames=FALSE, append=TRUE)
+}
+
+for(i in 28:40) {
+  filename <- paste0("yelp_reviewn",i)
+  filepath <- paste0("C:/Jai/MSDA/MSDA_JM/DATA607/Yelp/YelpReview/",filename)
+  print(filepath)
+  dfr <- stream_in(file(filepath), pagesize = 5000, flatten=TRUE, simplifyDataFrame=TRUE)
+  sqlSave(conn, dfr, tablename="YelpReview", rownames=FALSE, append=TRUE)
+}
+
+for(i in 13,27,41) {
+  filename <- paste0("yelp_reviewn",i)
+  filepath <- paste0("C:/Jai/MSDA/MSDA_JM/DATA607/Yelp/YelpReview/",filename)
+  print(filepath)
+  dfr <- stream_in(file(filepath), pagesize = 5000, flatten=TRUE, simplifyDataFrame=TRUE)
+  sqlSave(conn, dfr, tablename="YelpReview", rownames=FALSE, append=TRUE)
+}
+
