@@ -1,0 +1,105 @@
+select count(*) from YelpLVReview 
+
+select top(10) * from YelplvReview
+
+
+SELECT review_id, COUNT(*)  AS dupes FROM YelplvReview GROUP BY review_id HAVING (COUNT(*) > 1)
+
+select into YelpLVReview 
+
+SELECT YELPREVIEW.* INTO YELPLVREVIEW FROM YELPREVIEW, YELPLVBUSINESS WHERE YELPLVBUSINESS.BUSINESS_ID=YELPREVIEW.BUSINESS_ID
+
+select * from ( select *, rn=row_number() over(partition by REVIEW_ID order by (select null))   from YELPLVREVIEW ) x where rn > 1
+
+delete x from (select *, rn=row_number() over (partition by REVIEW_ID order by (select null))   from YELPLVREVIEW ) x where rn > 1
+
+SELECT * FROM sys.dm_fts_parser (' "The Microsoft business analysis" ', 1033, 0, 0)
+
+select top(10) * from YelpLVReviewTokens
+
+select text from YelpLVReview where business_id in ('9f68hfHK6gNyHWmt9guiJw',	'dblGQtHAzNy1ACis1m2shw',	'dFmaYj3_cZpmEaL4WSOkPg',	'eRQwgSQD1KyCmJk_PAGOXQ',	'FvC3W9E6rXUYx-cTxbnUiA', 	'iRFaq249LVEFGeXLzPULnQ',
+'lOQPeguczAueJnLmDUTfGg',	'MXC9pwIxovWUc9yu1F8OxA',	'Oyo5CWthu2upxxaf69MfIg',	'PSRZaGGxXmOmabL2si8pKw',	'q7LG_2s2urLJcD2IsxgTWg',	'Qc-bULSBAyVh_qaKRWkF9A',
+'So132GP_uy3XbGs0KNyzyw',	'suQugTjSMYMIrK5fAabC_Q',	't3AWGr757V4Fvcun6sDsuw','T5UBAJt5Kod_wQGbH6m9hA',	'w0ArxcJ0XsyK1ZwrIf3gpA',	'zfNKdsuT7bWWN-f3v5Rj_g')
+and stars <=2.5
+select distinct review from YelpLVReviewTokens, YelpLVReview where YelpLVReviewTokens.review = YelpLVReview.review_id and YelpLVReview.business_id in ('9f68hfHK6gNyHWmt9guiJw',	'dblGQtHAzNy1ACis1m2shw',	'dFmaYj3_cZpmEaL4WSOkPg',	'eRQwgSQD1KyCmJk_PAGOXQ',	'FvC3W9E6rXUYx-cTxbnUiA', 	'iRFaq249LVEFGeXLzPULnQ',
+'lOQPeguczAueJnLmDUTfGg',	'MXC9pwIxovWUc9yu1F8OxA',	'Oyo5CWthu2upxxaf69MfIg',	'PSRZaGGxXmOmabL2si8pKw',	'q7LG_2s2urLJcD2IsxgTWg',	'Qc-bULSBAyVh_qaKRWkF9A',
+'So132GP_uy3XbGs0KNyzyw',	'suQugTjSMYMIrK5fAabC_Q',	't3AWGr757V4Fvcun6sDsuw','T5UBAJt5Kod_wQGbH6m9hA',	'w0ArxcJ0XsyK1ZwrIf3gpA',	'zfNKdsuT7bWWN-f3v5Rj_g') and stars <=3
+
+
+
+select distinct review from YelpLVReviewTokens
+
+select count(*) from YelpLVReviewTokens
+
+SELECT * FROM sysobjects WHERE xtype='U' 
+
+
+select distinct review from YelpLVReviewTokens
+
+select count(*) from YelpLVReviewTokens
+
+SELECT * FROM sysobjects WHERE xtype='U' 
+
+
+
+--Split Function (sourced)
+CREATE FUNCTION [dbo].[Split]
+(
+    @String NVARCHAR(4000),
+    @Delimiter NCHAR(1)
+)
+RETURNS TABLE
+AS
+RETURN
+(
+    WITH Split(stpos,endpos)
+    AS(
+        SELECT 0 AS stpos, CHARINDEX(@Delimiter,@String) AS endpos
+        UNION ALL
+        SELECT endpos+1, CHARINDEX(@Delimiter,@String,endpos+1)
+            FROM Split
+            WHERE endpos > 0
+    )
+    SELECT 'Id' = ROW_NUMBER() OVER (ORDER BY (SELECT 1)),
+        'Data' = SUBSTRING(@String,stpos,COALESCE(NULLIF(endpos,0),LEN(@String)+1)-stpos)
+    FROM Split
+)
+GO
+--Use Split function to derive Categories
+-- Clean up categories not relevant
+
+
+select city, category, count(*) num
+from YelpRestaurants YR, YelpRestaurantCategory YRC
+where YR.business_id = YRC.business_id 
+group by city, category 
+order by num desc
+
+select city, year(TRY_CONVERT(DATETIME, Date)), count(*) num 
+from YelpReview YR 
+group by city, year(TRY_CONVERT(DATETIME, Date))
+order by num desc
+
+select top(10) * from YelpReview YR
+
+
+select city, category, count(*) num
+from YelpRestaurants YR, YelpRestaurantCategory YRC
+where YR.business_id = YRC.business_id 
+group by city, category 
+order by num desc
+
+select city, year(TRY_CONVERT(DATETIME, Date)), count(*) num 
+from YelpReview YR 
+group by city, year(TRY_CONVERT(DATETIME, Date))
+order by num desc
+
+select top(10) * from YelpReview YR
+
+
+select distinct review from YelpLVReviewTokens, YelpLVReview where YelpLVReviewTokens.review = YelpLVReview.review_id and YelpLVReview.business_id in ('9f68hfHK6gNyHWmt9guiJw',	'dblGQtHAzNy1ACis1m2shw',	'dFmaYj3_cZpmEaL4WSOkPg',	'eRQwgSQD1KyCmJk_PAGOXQ',	'FvC3W9E6rXUYx-cTxbnUiA', 	'iRFaq249LVEFGeXLzPULnQ',
+'lOQPeguczAueJnLmDUTfGg',	'MXC9pwIxovWUc9yu1F8OxA',	'Oyo5CWthu2upxxaf69MfIg',	'PSRZaGGxXmOmabL2si8pKw',	'q7LG_2s2urLJcD2IsxgTWg',	'Qc-bULSBAyVh_qaKRWkF9A',
+'So132GP_uy3XbGs0KNyzyw',	'suQugTjSMYMIrK5fAabC_Q',	't3AWGr757V4Fvcun6sDsuw','T5UBAJt5Kod_wQGbH6m9hA',	'w0ArxcJ0XsyK1ZwrIf3gpA',	'zfNKdsuT7bWWN-f3v5Rj_g') 
+
+
+

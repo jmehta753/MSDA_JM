@@ -1,0 +1,14 @@
+1. Download ODBC driver from https://www.microsoft.com/en-us/download/details.aspx?id=50420
+Use x64 option for 64bit OS and x86 for 32bit OS. I used the former.
+1A. Install R package RODBC
+2. R code sample - 
+
+```{r}
+library(RODBC)
+
+connectionString <- "Driver=ODBC Driver 13 for SQL Server;Server=tcp:data607yelp1.database.windows.net,1433;Database=DATA607_FinalProject_Yelp1;Uid=data607@data607yelp1;Pwd=XXXX;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+conn <- odbcDriverConnect(connectionString)
+```
+3. Use sqlQuery() function from RODBC for any querying.
+
+4. Table name - YelpBusiness
