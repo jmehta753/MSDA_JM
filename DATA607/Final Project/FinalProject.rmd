@@ -2,12 +2,13 @@
 title: "Final Project"
 author: "Georgia Galanopoulos  & Jaideep Mehta"
 date: "May 14, 2017"
-output:
+output: 
   html_document:
     toc: true
     toc_float: true
     theme: yeti
     highlight: tango
+    code_folding: hide
 ---
 
 ## Objective
@@ -15,7 +16,9 @@ output:
 This project is driven by Yelp Academic Data Set, which is offered via Yelp Data Challenge. Yelp is one of the leading online recommendation sites for Restaurants and other local businesses, and it is very popular in North America and Europe. 
 
 Our objective with the project is two-fold-
+
 1. Sentiment Analysis: Analysing if Yelp Reviews for a Restaurants correlate with Health Inspection Grades issued by the city.
+
 2. Exploratory analysis: Explore the Yelp Dataset to spot 
    a) Locational concentrations of high quality restaurants
    b) Variation in Cultural Trends and Preferences across Major Cities
@@ -27,6 +30,7 @@ The method used in this project in order to answer the primary questions was an 
   
 ## Introduction to the Data
 The data set comprises of following files -
+
 ![YelpFiles](YelpFiles.png)
 
 It is a large dataset with details of about 4 million reviews, 1 million users and 144 thousand businesses.
@@ -35,7 +39,8 @@ It is a large dataset with details of about 4 million reviews, 1 million users a
 
 The schema of the json files is as follows -
 
-![YelpDataSchema](https://github.com/jmehta753/MSDA_JM/blob/master/DATA607/Final%20Project/YelpDataSchema.png)
+
+![YelpDataSchema](YelpDataSchema.png)
 
 More details about the challenge, dataset an its schema can be seen at the Yelp Data Challenge website.
 
@@ -52,16 +57,24 @@ connectionString <- "Driver=ODBC Driver 13 for SQL Server;Server=tcp:data607yelp
 ```
 
 The tables uploaded were, which correspnd to yelp files mentioned above -
+
 YelpBusiness
+
 YelpUser
+
 YelpReview
 
 
 Once the data was uploaded multiple tables were created on server side as well to help the analysis -
+
 YelpLVBusiness - Restaurants in Las Vegas
+
 YelpLVReview - Reviews for Restaurants in Las Vegas
+
 YelpLVReviewTokens - Tokens from Sample Las Vegas Reviews to be used in Sentiment Analysis  
+
 YelpRestaurants - All Yelp Restaurants
+
 YelpRestaurantCategory - Restaurants and their Category (~Cuisine) table
 
 
@@ -316,7 +329,7 @@ Plotting the words that the afinn lexicon determined as positive/negative
 
 The detail to pay attention to here is not only the words that 5-star reviews earned, but whether the words for higher star scores are related to health/cleanliness. At first glance, the majority of the words have more to do with taste than hygiene. 
 
-```{r}
+```{r eval=FALSE}
 # Plots of the words scores vs the users' star score for each restaurant.
 ggplot(review.analysis, aes(score, stars.x, group = score)) + 
   geom_point(aes(colour = factor(score))) +
@@ -343,7 +356,7 @@ content <- function(name, address, neighbourhood) {
 ```
 
 ### Plot all the restaruants on the map to view the concentrations
-```{r}
+```{r eval=FALSE}
 colorDomain <- c(0.0,0.5,1.0,1.5,2.0,2.5,3.0,3.5,4.0,4.5)
 pal <- colorNumeric("YlGn", colorDomain, na.color = "transparent")
 leaflet(vegasFrame) %>% addTiles() %>% setView(lng = -115.1398, 
@@ -365,7 +378,8 @@ leaflet(vegasTopFrame) %>% addTiles() %>% setView(lng = -115.1398,
     popup = ~content(name, address, neighborhood), clusterOptions = markerClusterOptions()) 
 ```
 
-### Conclusion : While the Strip expectedly has highest number of high quality restaurants (at 268), it came as a surprise that Chinatown (with 166) and Downtown (with 157) has very large number of such places too.
+### Conclusion : 
+While the Strip expectedly has highest number of high quality restaurants (at 268), it came as a surprise that Chinatown (with 166) and Downtown (with 157) has very large number of such places too.
 
 
 ## Analysing the cultural trends and preferences across various cities
@@ -385,7 +399,7 @@ names(YelpRestaurantsCategory)
 AllReviews = sqlQuery(conn, "Select business_id, stars, date from YelpReview")
 ReviewsByYear <- AllReviews %>% select(business_id, stars, date) %>% mutate(year = substring(date, 1,4)) 
 ReviewsByYear <- ReviewsByYear %>% group_by(business_id, year) %>% summarise(meanStar = mean(stars), count=n())
-kable(ReviewsByYear)
+kable(head(ReviewsByYear))
 ```
 
 ### Combine Reviews with City (from Restaurants data) and Category data
@@ -399,7 +413,7 @@ BusinessYearOnYearGrid1 <- BusinessYearOnYearGrid %>% spread(key=year, value=cou
 BusinessYearOnYearGrid1[is.na(BusinessYearOnYearGrid1)] <- 0
 BusinessYearOnYearGrid1 <- BusinessYearOnYearGrid1 %>% group_by(city, category) %>% mutate(total=`2004`+`2005` + `2006`+`2007` +`2008`+`2009` + `2010`+`2011` + `2012`+`2013` + `2014`+`2015` + `2016`+`2017`)
 BusinessYearOnYearGrid1<- BusinessYearOnYearGrid1 %>% arrange(desc(total))
-kable(BusinessYearOnYearGrid1)
+kable(head(BusinessYearOnYearGrid1))
 ```
 
 
@@ -522,5 +536,5 @@ ggplot(NightlifeYearOnYearGrid, aes(x = city, y = category, label = `total`)) +
 1. The surprising thing here is simple similarity of all places. Bars and Pubs seems a category which remains unaffected by location.
 2. Only thing to note is Stuttgart has replaced Sports Bars with Beer gardens.
 
-Citations
-
+### Citations:
+Yelp Data Set
